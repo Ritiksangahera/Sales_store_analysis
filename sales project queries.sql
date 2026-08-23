@@ -125,12 +125,23 @@ limit 5;
 
 -- Business Impact: We should give him Personalized offers, loyalty rewards.
 -----------------------------------------------------------------------------------------------
--- 5. Which product categories generate the highest revenue?
+-- 5. Which are the top 5 product categories by revenue? (CTE)
 
-select product_category,sum(price*quantity) as revenue from sales
-group by product_category 
-order by revenue desc;
+WITH category_revenue AS (
+    SELECT
+        product_category,
+        SUM(price * quantity) AS total_revenue
+    FROM sales
+    WHERE status = 'delivered'
+    GROUP BY product_category
+)
 
+SELECT
+    product_category,
+    ROUND(total_revenue, 2) AS total_revenue
+FROM category_revenue
+ORDER BY total_revenue DESC
+LIMIT 5;
 -- Business Problem Solved: Identify top-performing product categories.
 
 -- Business Impact: We can invest more on these products and increase there supply
@@ -213,13 +224,25 @@ group by gender,product_category
 order by  count(product_category) desc ;
 
 -- Bussiness Problem : identify Gender based product performance
-
 -- Bussiness impact : personalized ads gender focused compagin
+-----------------------------------------------------------------------------------------------------
 
+-- 11. Rank Product based on revenue
 
+-- 12. Rank products based on total revenue
 
+SELECT
+    product_name,
+    ROUND(SUM(price * quantity), 2) AS total_revenue,
+    RANK() OVER (
+        ORDER BY SUM(price * quantity) DESC
+    ) AS revenue_rank
+FROM sales
+WHERE status = 'delivered'
+GROUP BY product_name
+ORDER BY revenue_rank;
 
-
-
-
+-- Business Problem: The business does not know which individual products are contributing the most revenue.
+-- Business Impact:
+-- Product ranking helps identify high-performing products for inventory planning, promotions, and targeted marketing.
 
